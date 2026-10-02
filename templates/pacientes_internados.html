@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta http-equiv="refresh" content="7200" />
+    <title>HGON - Pacientes Internados</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#003666",
+                        "secondary-container": "#fdd400",
+                        "on-secondary-container": "#6f5c00",
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        @keyframes scroll-vertical {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-50%);
+            }
+        }
+
+        .animate-table-scroll {
+            display: flex;
+            flex-direction: column;
+            animation: scroll-vertical 220s linear infinite;
+        }
+
+        .animate-table-scroll:hover {
+            animation-play-state: paused;
+        }
+
+        .animate-summary-scroll {
+            display: flex;
+            flex-direction: column;
+            animation: scroll-vertical 60s linear infinite;
+        }
+
+        .animate-summary-scroll:hover {
+            animation-play-state: paused;
+        }
+
+        /* Colores dinámicos basados en tu imagen */
+        .bg-ginecologia {
+            background-color: #22c55e !important;
+            color: white !important;
+        }
+
+        .bg-obstetricia {
+            background-color: #facc15 !important;
+            color: black !important;
+        }
+
+        .bg-alto-riesgo {
+            background-color: #ef4444 !important;
+            color: white !important;
+        }
+
+        .bg-terapia-intermedia {
+            background-color: #f9a8d4 !important;
+            color: black !important;
+        }
+
+        .bg-terapia-intensiva {
+            background-color: #d97706 !important;
+            color: white !important;
+        }
+
+        .bg-default {
+            background-color: #94a3b8 !important;
+            color: white !important;
+        }
+
+        .border-ginecologia {
+            border-left-color: #22c55e !important;
+        }
+
+        .border-obstetricia {
+            border-left-color: #facc15 !important;
+        }
+
+        .border-alto-riesgo {
+            border-left-color: #ef4444 !important;
+        }
+
+        .border-terapia-intermedia {
+            border-left-color: #f9a8d4 !important;
+        }
+
+        .border-terapia-intensiva {
+            border-left-color: #d97706 !important;
+        }
+
+        .border-default {
+            border-left-color: #94a3b8 !important;
+        }
+
+        @keyframes scroll-text {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .animate-scroll {
+            animation: scroll-text 40s linear infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-[#f8fafc] h-screen overflow-hidden flex flex-col font-['Inter']">
+    <header class="w-full h-20 flex items-center bg-[#001c39] shadow-lg px-8 justify-between shrink-0 z-30">
+        <div class="flex items-center gap-4">
+            <img src="/static/hgon.png" alt="Logo HGON" class="h-20 w-auto object-contain block"
+                style="min-width: 80px; min-height: 80px; display: block !important;"
+                onerror="this.onerror=null; this.src='https://via.placeholder.com/80?text=HGON';">
+
+            <div class="text-2xl font-black text-white uppercase tracking-tighter leading-none">
+                HGON<br /><span class="text-[#68fadd] text-xl">SUCRE</span>
+            </div>
+            <div class="h-10 w-[1px] bg-white/20 mx-4"></div>
+            <h1 class="text-[#68fadd] text-4xl font-black tracking-tight uppercase">PACIENTES INTERNADOS</h1>
+        </div>
+        <div class="flex items-center gap-10">
+            <div class="text-right">
+                <div class="text-white/50 font-bold text-xs uppercase tracking-[0.2em] mb-1">Estado del Sistema</div>
+                <div class="flex items-center justify-end gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#10b981] shadow-[0_0_8px_#10b981]"></span>
+                    <span class="text-[#10b981] font-black text-sm uppercase tracking-widest">OPERATIVO</span>
+                </div>
+            </div>
+            <div class="flex flex-col items-end border-l border-white/10 pl-10">
+                <span class="text-[#68fadd] text-5xl font-black tracking-tighter leading-none" id="clock">00:00</span>
+                <span class="text-white text-[10px] font-black uppercase tracking-[0.3em] mt-1">{{ fecha_actual
+                    }}</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-hidden p-4 flex gap-4">
+        <section class="flex-[3] flex flex-col gap-4 overflow-hidden">
+            <div
+                class="grid grid-cols-12 px-2 py-1 bg-[#00284d] text-white font-black uppercase tracking-[0.2em] text-sm rounded-lg items-center shadow-lg border-b border-white/10">
+                <div class="col-span-1 text-center">N°</div>
+                <div class="col-span-3 text-center">PACIENTE</div>
+                <div class="col-span-3 text-center">UNIDAD MÉDICA</div>
+                <div class="col-span-1 text-center">SALA</div>
+                <div class="col-span-1 text-center">CAMA</div>
+                <div class="col-span-2 text-center">FECH_ING</div>
+                <div class="col-span-1 text-center">HORA</div>
+            </div>
+
+            <div class="flex-1 overflow-hidden relative">
+                <div class="animate-table-scroll flex flex-col gap-2">
+                    {# Generamos la lista dos veces para el efecto de giro infinito #}
+                    {% for i in range(2) %}
+                    {% for paciente in pacientes %}
+                    {% set unidad = paciente.UNIDAD_MEDICA.upper() %}
+                    {% set cat =
+                    'ginecologia' if 'GINECOLOGIA' in unidad else
+                    'alto-riesgo' if 'ALTO RIESGO' in unidad else
+                    'obstetricia' if 'OBSTETRICIA' in unidad else
+                    'terapia-intermedia' if 'INTERMEDIA' in unidad else
+                    'terapia-intensiva' if 'INTENSIVA' in unidad else
+                    'default'
+                    %}
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-{{ cat }} rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">{{ loop.index }}</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">{{
+                            paciente.PACIENTE }}</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-{{ cat }}">
+                                {{ paciente.UNIDAD_MEDICA }}
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">{{ paciente.SALA }}</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">{{ paciente.CAMA }}</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">{{ paciente.FECH_ING }}
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">{{ paciente.HORA }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <aside class="flex-1 flex flex-col gap-2 min-w-[380px]">
+            <div
+                class="bg-[#001c39] p-6 rounded-3xl flex flex-col shadow-2xl relative overflow-hidden h-[30%] justify-between border border-white/5">
+                <h3 class="text-white font-black uppercase tracking-[0.2em] text-sm text-left">Ocupación Total</h3>
+
+                {# Cálculo seguro para evitar errores de división en el template #}
+                {% set porcentaje = (total * 100 / 55) | int if total else 0 %}
+
+                <div class="flex items-center justify-center gap-4 flex-1">
+                    <div class="text-6xl font-black text-[#68fadd] tracking-tighter leading-none">
+                        {{ porcentaje }}%
+                    </div>
+                    <span class="material-symbols-outlined text-[100px] text-white">
+                        bed
+                    </span>
+                </div>
+
+                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                    <div class="bg-[#68fadd] h-full rounded-full transition-all duration-1000"
+                        style="width: {{ porcentaje }}%"></div>
+                </div>
+            </div>
+            <div
+                class="bg-white p-6 rounded-3xl flex-1 flex flex-col shadow-xl border border-slate-100 overflow-hidden">
+                <h3 class="text-slate-900 font-black uppercase tracking-[0.2em] text-sm mb-6 flex items-center gap-1 shrink-0">
+                    <span class="material-symbols-outlined text-primary">analytics</span> Resumen por Unidad
+                </h3>
+                <div class="flex-1 overflow-hidden relative">
+                    <div class="animate-summary-scroll flex flex-col gap-4">
+                        {% for i in range(2) %}
+                        {% for unidad_nombre, cantidad in resumen.items() %}
+                        {% set u_upper = unidad_nombre.upper() %}
+                        {% set b_color =
+                        'border-ginecologia' if 'GINECOLOGIA' in u_upper else
+                        'border-alto-riesgo' if 'ALTO RIESGO' in u_upper else
+                        'border-obstetricia' if 'OBSTETRICIA' in u_upper else
+                        'border-terapia-intermedia' if 'INTERMEDIA' in u_upper else
+                        'border-terapia-intensiva' if 'INTENSIVA' in u_upper else
+                        'border-slate-300'
+                        %}
+                        <div
+                            class="bg-slate-50 p-5 rounded-2xl flex items-center justify-between border-l-4 {{ b_color }}">
+                            <span class="text-[15px] font-black text-slate-900 uppercase tracking-widest">{{
+                                unidad_nombre
+                                }}</span>
+                            <span class="text-3xl font-black text-primary tracking-tighter">{{ cantidad }}</span>
+                        </div>
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between shrink-0">
+                    <span class="font-black text-primary text-2xl">TOTAL</span>
+                    <span class="font-black text-primary text-3xl tracking-tighter">{{ total }}</span>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Unified Footer -->
+    <footer class="fixed bottom-0 w-full h-10 bg-[#001c39] flex items-center overflow-hidden shrink-0 z-40">
+        <div class="bg-primary h-full px-6 flex items-center z-20 border-r border-white/10">
+            <span
+                class="font-['Inter'] text-[#68fadd] text-sm font-black uppercase tracking-[0.25em] whitespace-nowrap">AVISOS</span>
+        </div>
+        <div class="flex-1 overflow-hidden relative">
+            <div class="animate-scroll whitespace-nowrap flex items-center gap-16 py-4">
+                <p class="text-white/80 font-bold text-xl uppercase tracking-wider flex items-center gap-4">
+                    <span class="w-1.5 h-2 rounded-full bg-[#68fadd]"></span>
+                    RECUERDE: LÁVESE LAS MANOS CON FRECUENCIA. RESPETE EL HORARIO DE VISITA.
+                </p>
+                <p class="text-white/80 font-bold text-xl uppercase tracking-wider flex items-center gap-4">
+                    <span class="w-1.5 h-2 rounded-full bg-[#68fadd]"></span>
+                    POR FAVOR, MANTENGA SILENCIO EN LAS ÁREAS DE ESPERA PARA MAYOR COMODIDAD.
+                </p>
+                <p class="text-white/80 font-bold text-xl uppercase tracking-wider flex items-center gap-4">
+                    <span class="w-2 h-2 rounded-full bg-[#68fadd]"></span>
+                    EL USO DE MASCARILLA ES OBLIGATORIO EN TODAS NUESTRAS INSTALACIONES.
+                </p>
+                <!-- Duplicado para efecto continuo -->
+                <p class="text-white/80 font-bold text-xl uppercase tracking-wider flex items-center gap-4">
+                    <span class="w-1.5 h-2 rounded-full bg-[#68fadd]"></span>
+                    RECUERDE: LÁVESE LAS MANOS CON FRECUENCIA. RESPETE EL HORARIO DE VISITA.
+                </p>
+                <p class="text-white/80 font-bold text-xl uppercase tracking-wider flex items-center gap-4">
+                    <span class="w-1.5 h-2 rounded-full bg-[#68fadd]"></span>
+                    POR FAVOR, MANTENGA SILENCIO EN LAS ÁREAS DE ESPERA PARA MAYOR COMODIDAD.
+                </p>
+                <p class="text-white/80 font-bold text-xl uppercase tracking-wider flex items-center gap-4">
+                    <span class="w-2 h-2 rounded-full bg-[#68fadd]"></span>
+                    EL USO DE MASCARILLA ES OBLIGATORIO EN TODAS NUESTRAS INSTALACIONES.
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const clockElement = document.getElementById('clock');
+            if (clockElement) {
+                clockElement.textContent = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Actualización silenciosa en segundo plano
+        async function updateData() {
+            try {
+                const response = await fetch(window.location.href);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+
+                // Actualizar tabla principal
+                const tableContainer = document.querySelector('.animate-table-scroll');
+                const newTable = doc.querySelector('.animate-table-scroll');
+                if (tableContainer && newTable) {
+                    tableContainer.innerHTML = newTable.innerHTML;
+                }
+
+                // Actualizar resumen lateral
+                const summaryContainer = document.querySelector('.animate-summary-scroll');
+                const newSummary = doc.querySelector('.animate-summary-scroll');
+                if (summaryContainer && newSummary) {
+                    summaryContainer.innerHTML = newSummary.innerHTML;
+                }
+
+                // Actualizar total y porcentaje (opcional, pero recomendado)
+                const mainLayout = doc.querySelector('main');
+                if (mainLayout) {
+                    const aside = document.querySelector('aside');
+                    const newAside = mainLayout.querySelector('aside');
+                    if (aside && newAside) {
+                        aside.innerHTML = newAside.innerHTML;
+                    }
+                }
+
+            } catch (e) {
+                console.warn("Reintentando actualización de datos en Internados: ", e);
+            }
+        }
+        setInterval(updateData, 60000); // 1 minuto para internados (menos frecuencia necesaria)
+    </script>
+</body>
+
+</html>

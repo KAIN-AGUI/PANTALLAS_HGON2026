@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta http-equiv="refresh" content="7200" />
+    <title>HGON - Pacientes Internados</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#003666",
+                        "secondary-container": "#fdd400",
+                        "on-secondary-container": "#6f5c00",
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        @keyframes scroll-vertical {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-50%);
+            }
+        }
+
+        .animate-table-scroll {
+            display: flex;
+            flex-direction: column;
+            animation: scroll-vertical 220s linear infinite;
+        }
+
+        .animate-table-scroll:hover {
+            animation-play-state: paused;
+        }
+
+        .animate-summary-scroll {
+            display: flex;
+            flex-direction: column;
+            animation: scroll-vertical 60s linear infinite;
+        }
+
+        .animate-summary-scroll:hover {
+            animation-play-state: paused;
+        }
+
+        /* Colores dinámicos basados en tu imagen */
+        .bg-ginecologia {
+            background-color: #22c55e !important;
+            color: white !important;
+        }
+
+        .bg-obstetricia {
+            background-color: #facc15 !important;
+            color: black !important;
+        }
+
+        .bg-alto-riesgo {
+            background-color: #ef4444 !important;
+            color: white !important;
+        }
+
+        .bg-terapia-intermedia {
+            background-color: #f9a8d4 !important;
+            color: black !important;
+        }
+
+        .bg-terapia-intensiva {
+            background-color: #d97706 !important;
+            color: white !important;
+        }
+
+        .bg-default {
+            background-color: #94a3b8 !important;
+            color: white !important;
+        }
+
+        .border-ginecologia {
+            border-left-color: #22c55e !important;
+        }
+
+        .border-obstetricia {
+            border-left-color: #facc15 !important;
+        }
+
+        .border-alto-riesgo {
+            border-left-color: #ef4444 !important;
+        }
+
+        .border-terapia-intermedia {
+            border-left-color: #f9a8d4 !important;
+        }
+
+        .border-terapia-intensiva {
+            border-left-color: #d97706 !important;
+        }
+
+        .border-default {
+            border-left-color: #94a3b8 !important;
+        }
+
+        @keyframes scroll-text {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .animate-scroll {
+            animation: scroll-text 40s linear infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-[#f8fafc] h-screen overflow-hidden flex flex-col font-['Inter']">
+    <header class="w-full h-20 flex items-center bg-[#001c39] shadow-lg px-8 justify-between shrink-0 z-30">
+        <div class="flex items-center gap-4">
+            <img src="/static/hgon.png" alt="Logo HGON" class="h-20 w-auto object-contain block"
+                style="min-width: 80px; min-height: 80px; display: block !important;"
+                onerror="this.onerror=null; this.src='https://via.placeholder.com/80?text=HGON';">
+
+            <div class="text-2xl font-black text-white uppercase tracking-tighter leading-none">
+                HGON<br /><span class="text-[#68fadd] text-xl">SUCRE</span>
+            </div>
+            <div class="h-10 w-[1px] bg-white/20 mx-4"></div>
+            <h1 class="text-[#68fadd] text-4xl font-black tracking-tight uppercase">PACIENTES INTERNADOS</h1>
+        </div>
+        <div class="flex items-center gap-10">
+            <div class="text-right">
+                <div class="text-white/50 font-bold text-xs uppercase tracking-[0.2em] mb-1">Estado del Sistema</div>
+                <div class="flex items-center justify-end gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#10b981] shadow-[0_0_8px_#10b981]"></span>
+                    <span class="text-[#10b981] font-black text-sm uppercase tracking-widest">OPERATIVO</span>
+                </div>
+            </div>
+            <div class="flex flex-col items-end border-l border-white/10 pl-10">
+                <span class="text-[#68fadd] text-5xl font-black tracking-tighter leading-none" id="clock">00:00</span>
+                <span class="text-white text-[10px] font-black uppercase tracking-[0.3em] mt-1">02 OCT 2026</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-hidden p-4 flex gap-4">
+        <section class="flex-[3] flex flex-col gap-4 overflow-hidden">
+            <div
+                class="grid grid-cols-12 px-2 py-1 bg-[#00284d] text-white font-black uppercase tracking-[0.2em] text-sm rounded-lg items-center shadow-lg border-b border-white/10">
+                <div class="col-span-1 text-center">N°</div>
+                <div class="col-span-3 text-center">PACIENTE</div>
+                <div class="col-span-3 text-center">UNIDAD MÉDICA</div>
+                <div class="col-span-1 text-center">SALA</div>
+                <div class="col-span-1 text-center">CAMA</div>
+                <div class="col-span-2 text-center">FECH_ING</div>
+                <div class="col-span-1 text-center">HORA</div>
+            </div>
+
+            <div class="flex-1 overflow-hidden relative">
+                <div class="animate-table-scroll flex flex-col gap-2">
+                    
+                    
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">1</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">ISLA LLANTO PAULA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">4</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">13</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">02/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:41:24
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">2</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">AVILES MERCADO ALEJANDRA NICOLE</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">6</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">18</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:44:58
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">3</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">SORIA VARGAS EVELIN</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">14</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:41:49
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">4</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">LINARES ORTIZ DEYANIRA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">7</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:39:34
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">5</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">ROJAS DIAZ FABIANA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:16:12
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">6</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">GARNICA ALIZARES ANABEL</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">9</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">23</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:40:33
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">7</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">CASTRO MAMANI JHOSELIN MADELEIN</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">11</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">26</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:39:36
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">8</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">SANDOVAL PANDAL EMELI</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">11</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:05:25
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">9</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> MORALES SONIA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">8</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">22</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">07:33:38
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">10</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">CARMONA GARCIA ERICKA DANIELA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">9</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">25</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">07:31:54
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">11</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">DURAN MENDES REYNA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">9</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">24</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">07:30:01
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">12</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">CARDENAS VILLALOBOS JHENNY EVELIN</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">4</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">8</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:47:11
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">13</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">VARGAS MENDOZA CATALINA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">6</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">20</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:45:58
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">14</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">ALIAGA OVIEDO ANA ALICIA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">16</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:43:43
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">15</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">PACHECO VALDA KATHERIN MAYTE</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">4</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">14</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">12:29:02
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">16</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">LLAVETA AVENDAÑO ROXANA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">15</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">12:28:05
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">17</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">BEJARANO MAMANI REYNA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">6</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">18</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">12:27:05
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">18</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">LEON SACACA VIRGINIA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">7</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">19</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">12:26:18
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-alto-riesgo rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">19</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">VALVERDE AYALA SOL ANTONIETA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-alto-riesgo">
+                                ALTO RIESGO OBSTETRICO
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">6</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:40:32
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-alto-riesgo rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">20</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">ANDRADE PICHA CECILIA ABIGAIL</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-alto-riesgo">
+                                ALTO RIESGO OBSTETRICO
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:39:41
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">21</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">MAMANI BEJARANO LIZETH</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">7</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">20</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:36:51
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-alto-riesgo rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">22</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">HERRERA SIFUENTES LEONIDAS</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-alto-riesgo">
+                                ALTO RIESGO OBSTETRICO
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">1</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">1</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">29/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">12:09:35
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">23</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">ALEGRE GARCIA NELLY</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">16</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">29/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:51:05
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">24</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">SANTOS SANTOS SARA HELEN</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">6</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">17</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">29/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:50:10
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">25</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">FERNANDEZ CRUZ MARTHA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">28/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:38:33
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">26</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">CARDENAS TERRAZAS JUANA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">6</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">18</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">27/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:48:29
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">27</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> ZARATE MARIA ELIZABETH</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">4</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">11</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">27/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:40:50
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intermedia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">28</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> CURTIÑAZ RN M 25 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intermedia">
+                                UNIDAD TERAPIA INTERMEDIA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">14</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">25/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:03:04
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intermedia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">29</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> CUEVAS RN M 24 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intermedia">
+                                UNIDAD TERAPIA INTERMEDIA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">13</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">24/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:02:18
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">30</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> BALTAZAR RN240926</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">14</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">24/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">10:59:21
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">31</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> MONTAÑO RN M 23 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">8</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">23/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">14:37:11
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">32</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> MARTINEZ RN F 17 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">7</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">17/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">10:16:56
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">33</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> CHANEZ RN F 16 SEPT 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">12</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">16/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">10:18:06
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-alto-riesgo rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">34</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">TORREZ CARDONA LITZI ANDREA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-alto-riesgo">
+                                ALTO RIESGO OBSTETRICO
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">7</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">15/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">10:27:59
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intermedia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">35</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> MENDOZA RN M 07 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intermedia">
+                                UNIDAD TERAPIA INTERMEDIA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">15</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">09/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">00:00:00
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">36</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> PATZI RN M 04 SEPT 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">4</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">07/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">14:09:45
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">37</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> COA RN F 03 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">03/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:01:11
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">38</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> CAIREYU RN M 01 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">9</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:00:31
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">39</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> ZARATE RN M 30 AGOS 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">1</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/08/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:50:02
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intermedia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">40</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> FLORES RN F 18 AGOS 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intermedia">
+                                UNIDAD TERAPIA INTERMEDIA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">13</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">18/08/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:49:53
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">41</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> ORTEGA RN F 14 AGOS 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">14/08/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:58:52
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intermedia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">42</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> RENGIPO RN F 07 MAR 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intermedia">
+                                UNIDAD TERAPIA INTERMEDIA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">11</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">24/03/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">00:00:00
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">1</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">ISLA LLANTO PAULA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">4</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">13</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">02/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:41:24
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">2</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">AVILES MERCADO ALEJANDRA NICOLE</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">6</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">18</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:44:58
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">3</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">SORIA VARGAS EVELIN</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">14</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:41:49
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">4</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">LINARES ORTIZ DEYANIRA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">7</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:39:34
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">5</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">ROJAS DIAZ FABIANA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:16:12
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">6</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">GARNICA ALIZARES ANABEL</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">9</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">23</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:40:33
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">7</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">CASTRO MAMANI JHOSELIN MADELEIN</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">11</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">26</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:39:36
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">8</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">SANDOVAL PANDAL EMELI</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">11</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:05:25
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">9</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> MORALES SONIA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">8</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">22</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">07:33:38
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">10</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">CARMONA GARCIA ERICKA DANIELA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">9</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">25</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">07:31:54
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">11</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">DURAN MENDES REYNA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">9</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">24</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/10/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">07:30:01
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">12</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">CARDENAS VILLALOBOS JHENNY EVELIN</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">4</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">8</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:47:11
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">13</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">VARGAS MENDOZA CATALINA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">6</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">20</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:45:58
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">14</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">ALIAGA OVIEDO ANA ALICIA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">16</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:43:43
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">15</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">PACHECO VALDA KATHERIN MAYTE</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">4</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">14</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">12:29:02
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">16</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">LLAVETA AVENDAÑO ROXANA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">15</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">12:28:05
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">17</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">BEJARANO MAMANI REYNA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">6</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">18</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">12:27:05
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">18</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">LEON SACACA VIRGINIA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">7</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">19</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">12:26:18
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-alto-riesgo rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">19</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">VALVERDE AYALA SOL ANTONIETA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-alto-riesgo">
+                                ALTO RIESGO OBSTETRICO
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">6</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:40:32
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-alto-riesgo rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">20</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">ANDRADE PICHA CECILIA ABIGAIL</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-alto-riesgo">
+                                ALTO RIESGO OBSTETRICO
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:39:41
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">21</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">MAMANI BEJARANO LIZETH</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">7</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">20</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">08:36:51
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-alto-riesgo rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">22</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">HERRERA SIFUENTES LEONIDAS</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-alto-riesgo">
+                                ALTO RIESGO OBSTETRICO
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">1</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">1</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">29/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">12:09:35
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">23</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">ALEGRE GARCIA NELLY</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">16</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">29/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:51:05
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-obstetricia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">24</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">SANTOS SANTOS SARA HELEN</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-obstetricia">
+                                HOSPITALIZACION OBSTETRICIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">6</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">17</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">29/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:50:10
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">25</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">FERNANDEZ CRUZ MARTHA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">28/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:38:33
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">26</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">CARDENAS TERRAZAS JUANA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">6</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">18</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">27/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:48:29
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-ginecologia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">27</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> ZARATE MARIA ELIZABETH</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-ginecologia">
+                                HOSPITALIZACION GINECOLOGIA
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">4</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">11</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">27/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">17:40:50
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intermedia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">28</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> CURTIÑAZ RN M 25 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intermedia">
+                                UNIDAD TERAPIA INTERMEDIA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">14</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">25/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:03:04
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intermedia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">29</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> CUEVAS RN M 24 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intermedia">
+                                UNIDAD TERAPIA INTERMEDIA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">13</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">24/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:02:18
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">30</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> BALTAZAR RN240926</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">14</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">24/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">10:59:21
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">31</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> MONTAÑO RN M 23 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">8</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">23/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">14:37:11
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">32</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> MARTINEZ RN F 17 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">7</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">17/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">10:16:56
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">33</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> CHANEZ RN F 16 SEPT 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">12</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">16/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">10:18:06
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-alto-riesgo rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">34</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight">TORREZ CARDONA LITZI ANDREA</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-alto-riesgo">
+                                ALTO RIESGO OBSTETRICO
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">7</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">15/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">10:27:59
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intermedia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">35</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> MENDOZA RN M 07 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intermedia">
+                                UNIDAD TERAPIA INTERMEDIA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">15</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">09/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">00:00:00
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">36</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> PATZI RN M 04 SEPT 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">4</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">07/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">14:09:45
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">37</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> COA RN F 03 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">03/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:01:11
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">38</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> CAIREYU RN M 01 SEP 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">9</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">01/09/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:00:31
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">39</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> ZARATE RN M 30 AGOS 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">1</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">30/08/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:50:02
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intermedia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">40</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> FLORES RN F 18 AGOS 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intermedia">
+                                UNIDAD TERAPIA INTERMEDIA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">13</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">18/08/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:49:53
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intensiva rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">41</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> ORTEGA RN F 14 AGOS 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intensiva">
+                                UNIDAD TERAPIA INTENSIVA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">3</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">5</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">14/08/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">11:58:52
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div
+                        class="grid grid-cols-12 px-8 py-4 bg-white border-l-[10px] border-terapia-intermedia rounded-xl items-center shadow-sm">
+                        <div class="col-span-1 text-3xl font-black text-primary">42</div>
+                        <div class="col-span-3 text-2xl font-black text-primary uppercase tracking-tight"> RENGIPO RN F 07 MAR 2026</div>
+                        <div class="col-span-3">
+                            <span
+                                class="px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest inline-block bg-terapia-intermedia">
+                                UNIDAD TERAPIA INTERMEDIA NEONATAL
+                            </span>
+                        </div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">2</div>
+                        <div class="col-span-1 text-center text-3xl font-black text-primary">11</div>
+                        <div class="col-span-2 text-center text-xl font-bold text-slate-800">24/03/2026
+                        </div>
+                        <div class="col-span-1 text-right text-xl font-mono font-bold text-primary">00:00:00
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+        </section>
+
+        <aside class="flex-1 flex flex-col gap-2 min-w-[380px]">
+            <div
+                class="bg-[#001c39] p-6 rounded-3xl flex flex-col shadow-2xl relative overflow-hidden h-[30%] justify-between border border-white/5">
+                <h3 class="text-white font-black uppercase tracking-[0.2em] text-sm text-left">Ocupación Total</h3>
+
+                
+                
+
+                <div class="flex items-center justify-center gap-4 flex-1">
+                    <div class="text-6xl font-black text-[#68fadd] tracking-tighter leading-none">
+                        80%
+                    </div>
+                    <span class="material-symbols-outlined text-[100px] text-white">
+                        bed
+                    </span>
+                </div>
+
+                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                    <div class="bg-[#68fadd] h-full rounded-full transition-all duration-1000"
+                        style="width: 80%"></div>
+                </div>
+            </div>
+            <div
+                class="bg-white p-6 rounded-3xl flex-1 flex flex-col shadow-xl border border-slate-100 overflow-hidden">
+                <h3 class="text-slate-900 font-black uppercase tracking-[0.2em] text-sm mb-6 flex items-center gap-1 shrink-0">
+                    <span class="material-symbols-outlined text-primary">analytics</span> Resumen por Unidad
+                </h3>
+                <div class="flex-1 overflow-hidden relative">
+                    <div class="animate-summary-scroll flex flex-col gap-4">
+                        
+                        
+                        
+                        
+                        <div
+                            class="bg-slate-50 p-5 rounded-2xl flex items-center justify-between border-l-4 border-alto-riesgo">
+                            <span class="text-[15px] font-black text-slate-900 uppercase tracking-widest">ALTO RIESGO OBSTETRICO</span>
+                            <span class="text-3xl font-black text-primary tracking-tighter">4</span>
+                        </div>
+                        
+                        
+                        
+                        <div
+                            class="bg-slate-50 p-5 rounded-2xl flex items-center justify-between border-l-4 border-ginecologia">
+                            <span class="text-[15px] font-black text-slate-900 uppercase tracking-widest">HOSPITALIZACION GINECOLOGIA</span>
+                            <span class="text-3xl font-black text-primary tracking-tighter">10</span>
+                        </div>
+                        
+                        
+                        
+                        <div
+                            class="bg-slate-50 p-5 rounded-2xl flex items-center justify-between border-l-4 border-obstetricia">
+                            <span class="text-[15px] font-black text-slate-900 uppercase tracking-widest">HOSPITALIZACION OBSTETRICIA</span>
+                            <span class="text-3xl font-black text-primary tracking-tighter">16</span>
+                        </div>
+                        
+                        
+                        
+                        <div
+                            class="bg-slate-50 p-5 rounded-2xl flex items-center justify-between border-l-4 border-terapia-intensiva">
+                            <span class="text-[15px] font-black text-slate-900 uppercase tracking-widest">UNIDAD TERAPIA INTENSIVA NEONATAL</span>
+                            <span class="text-3xl font-black text-primary tracking-tighter">10</span>
+                        </div>
+                        
+                        
+                        
+                        <div
+                            class="bg-slate-50 p-5 rounded-2xl flex items-center justify-between border-l-4 border-terapia-intermedia">
+                            <span class="text-[15px] font-black text-slate-900 uppercase tracking-widest">UNIDAD TERAPIA INTERMEDIA NEONATAL</span>
+                            <span class="text-3xl font-black text-primary tracking-tighter">4</span>
+                        </div>
+                        
+                        
+                        
+                        
+                        
+                        <div
+                            class="bg-slate-50 p-5 rounded-2xl flex items-center justify-between border-l-4 border-alto-riesgo">
+                            <span class="text-[15px] font-black text-slate-900 uppercase tracking-widest">ALTO RIESGO OBSTETRICO</span>
+                            <span class="text-3xl font-black text-primary tracking-tighter">4</span>
+                        </div>
+                        
+                        
+                        
+                        <div
+                            class="bg-slate-50 p-5 rounded-2xl flex items-center justify-between border-l-4 border-ginecologia">
+                            <span class="text-[15px] font-black text-slate-900 uppercase tracking-widest">HOSPITALIZACION GINECOLOGIA</span>
+                            <span class="text-3xl font-black text-primary tracking-tighter">10</span>
+                        </div>
+                        
+                        
+                        
+                        <div
+                            class="bg-slate-50 p-5 rounded-2xl flex items-center justify-between border-l-4 border-obstetricia">
+                            <span class="text-[15px] font-black text-slate-900 uppercase tracking-widest">HOSPITALIZACION OBSTETRICIA</span>
+                            <span class="text-3xl font-black text-primary tracking-tighter">16</span>
+                        </div>
+                        
+                        
+                        
+                        <div
+                            class="bg-slate-50 p-5 rounded-2xl flex items-center justify-between border-l-4 border-terapia-intensiva">
+                            <span class="text-[15px] font-black text-slate-900 uppercase tracking-widest">UNIDAD TERAPIA INTENSIVA NEONATAL</span>
+                            <span class="text-3xl font-black text-primary tracking-tighter">10</span>
+                        </div>
+                        
+                        
+                        
+                        <div
+                            class="bg-slate-50 p-5 rounded-2xl flex items-center justify-between border-l-4 border-terapia-intermedia">
+                            <span class="text-[15px] font-black text-slate-900 uppercase tracking-widest">UNIDAD TERAPIA INTERMEDIA NEONATAL</span>
+                            <span class="text-3xl font-black text-primary tracking-tighter">4</span>
+                        </div>
+                        
+                        
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between shrink-0">
+                    <span class="font-black text-primary text-2xl">TOTAL</span>
+                    <span class="font-black text-primary text-3xl tracking-tighter">44</span>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Unified Footer -->
+    <footer class="fixed bottom-0 w-full h-10 bg-[#001c39] flex items-center overflow-hidden shrink-0 z-40">
+        <div class="bg-primary h-full px-6 flex items-center z-20 border-r border-white/10">
+            <span
+                class="font-['Inter'] text-[#68fadd] text-sm font-black uppercase tracking-[0.25em] whitespace-nowrap">AVISOS</span>
+        </div>
+        <div class="flex-1 overflow-hidden relative">
+            <div class="animate-scroll whitespace-nowrap flex items-center gap-16 py-4">
+                <p class="text-white/80 font-bold text-xl uppercase tracking-wider flex items-center gap-4">
+                    <span class="w-1.5 h-2 rounded-full bg-[#68fadd]"></span>
+                    RECUERDE: LÁVESE LAS MANOS CON FRECUENCIA. RESPETE EL HORARIO DE VISITA.
+                </p>
+                <p class="text-white/80 font-bold text-xl uppercase tracking-wider flex items-center gap-4">
+                    <span class="w-1.5 h-2 rounded-full bg-[#68fadd]"></span>
+                    POR FAVOR, MANTENGA SILENCIO EN LAS ÁREAS DE ESPERA PARA MAYOR COMODIDAD.
+                </p>
+                <p class="text-white/80 font-bold text-xl uppercase tracking-wider flex items-center gap-4">
+                    <span class="w-2 h-2 rounded-full bg-[#68fadd]"></span>
+                    EL USO DE MASCARILLA ES OBLIGATORIO EN TODAS NUESTRAS INSTALACIONES.
+                </p>
+                <!-- Duplicado para efecto continuo -->
+                <p class="text-white/80 font-bold text-xl uppercase tracking-wider flex items-center gap-4">
+                    <span class="w-1.5 h-2 rounded-full bg-[#68fadd]"></span>
+                    RECUERDE: LÁVESE LAS MANOS CON FRECUENCIA. RESPETE EL HORARIO DE VISITA.
+                </p>
+                <p class="text-white/80 font-bold text-xl uppercase tracking-wider flex items-center gap-4">
+                    <span class="w-1.5 h-2 rounded-full bg-[#68fadd]"></span>
+                    POR FAVOR, MANTENGA SILENCIO EN LAS ÁREAS DE ESPERA PARA MAYOR COMODIDAD.
+                </p>
+                <p class="text-white/80 font-bold text-xl uppercase tracking-wider flex items-center gap-4">
+                    <span class="w-2 h-2 rounded-full bg-[#68fadd]"></span>
+                    EL USO DE MASCARILLA ES OBLIGATORIO EN TODAS NUESTRAS INSTALACIONES.
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const clockElement = document.getElementById('clock');
+            if (clockElement) {
+                clockElement.textContent = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Actualización silenciosa en segundo plano
+        async function updateData() {
+            try {
+                const response = await fetch(window.location.href);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+
+                // Actualizar tabla principal
+                const tableContainer = document.querySelector('.animate-table-scroll');
+                const newTable = doc.querySelector('.animate-table-scroll');
+                if (tableContainer && newTable) {
+                    tableContainer.innerHTML = newTable.innerHTML;
+                }
+
+                // Actualizar resumen lateral
+                const summaryContainer = document.querySelector('.animate-summary-scroll');
+                const newSummary = doc.querySelector('.animate-summary-scroll');
+                if (summaryContainer && newSummary) {
+                    summaryContainer.innerHTML = newSummary.innerHTML;
+                }
+
+                // Actualizar total y porcentaje (opcional, pero recomendado)
+                const mainLayout = doc.querySelector('main');
+                if (mainLayout) {
+                    const aside = document.querySelector('aside');
+                    const newAside = mainLayout.querySelector('aside');
+                    if (aside && newAside) {
+                        aside.innerHTML = newAside.innerHTML;
+                    }
+                }
+
+            } catch (e) {
+                console.warn("Reintentando actualización de datos en Internados: ", e);
+            }
+        }
+        setInterval(updateData, 60000); // 1 minuto para internados (menos frecuencia necesaria)
+    </script>
+</body>
+
+</html>

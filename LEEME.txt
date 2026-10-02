@@ -1,0 +1,36 @@
+# INSTRUCCIONES - HGON MONITORES
+
+Este paquete contiene la aplicación para los monitores de pacientes e indicadores.
+
+## Contenido:
+- AppPacientes.exe: El programa principal.
+- config.py: Archivo de configuración (Base de datos, Videos, Pantallas).
+- instalar.ps1: Script para automatizar la instalación en Windows.
+
+## Instalación:
+1. Copie la carpeta del proyecto a la nueva PC.
+2. Haga clic derecho en 'instalar.ps1' y seleccione "Ejecutar con PowerShell".
+3. El script creará la carpeta 'C:\HGON_Monitores' y pondrá accesos directos en el Escritorio e Inicio.
+
+## Configuración de Pantallas:
+El sistema detecta automáticamente la resolución de tus televisores. Asegúrese de que Windows esté configurado en modo "Extender estas pantallas".
+
+Si por alguna razón las ventanas no se abren en el lugar correcto, puede forzar las posiciones editando el archivo 'C:\HGON_Monitores\config.py'.
+
+## Requisitos:
+- Tener instalado el "Microsoft ODBC Driver 17 for SQL Server" en la PC.
+- Acceso a la red para conectar con el servidor de base de datos.
+
+## PARA GENERAR DE NUEVO UN EJECUTABLE
+Ejecute el siguiente comando en la carpeta del proyecto:
+python -m PyInstaller main.spec
+
+## Pasos finales para instalar:
+Ahora solo debes crear una nueva carpeta (por ejemplo en tu USB) y copiar dentro únicamente estos 3 elementos:
+
+La carpeta dist (que contiene AppPacientes.exe)
+El archivo config.py
+El archivo instalar.ps1
+Una vez en la computadora donde funcionarán las pantallas, haz clic derecho sobre el archivo instalar.ps1, selecciona "Ejecutar con PowerShell" y deja que el script configure todo.
+
+(Opcionalmente, puedes abrir y editar el config.py en la nueva computadora para ajustar los monitores y videos según necesites).
